@@ -10,6 +10,18 @@ type Props = {
   slug: string
 }
 
+function conditionalDateByline(publishedDate: string, updatedDate: string) {
+  const published = new Date(publishedDate).getTime()
+  const updated = new Date(updatedDate).getTime()
+  const diffHours = Math.abs(updated - published) / (1000 * 60 * 60)
+
+  // if the updated date is within the same 24 hours as the published date, return the published date
+  if (diffHours <= 24) {
+    return `প্রথম প্রকাশঃ ${prettyDate(publishedDate)}`
+  }
+  return `প্রথম প্রকাশঃ ${prettyDate(publishedDate)} # সর্বশেষ আপডেটঃ ${prettyDate(updatedDate)}`
+}
+
 export default async function SinglePostComponent({ slug }: Props) {
   const post = await fetchSinglePost(slug)
 
@@ -40,9 +52,9 @@ export default async function SinglePostComponent({ slug }: Props) {
             />
           </div>
           <div>
-            <div className='italic'>by {AUTHOR_NAME}</div>
-            <div className='uppercase text-[12px]'>
-              Published on: {prettyDate(post.date)}
+            <div className='italic'>লেখক: {AUTHOR_NAME}</div>
+            <div className='uppercase text-[14px]'>
+              {conditionalDateByline(post.date, post.modified)}
             </div>
           </div>
         </div>

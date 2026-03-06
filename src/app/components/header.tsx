@@ -3,7 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import React from "react"
-import { merriweather } from "../lib/utils"
+import { banglaHfont } from "@/fonts/fonts"
 import { SITE_NAME, SITE_TAGLINE } from "../lib/consts"
 import { usePathname } from "next/navigation"
 import { twMerge } from "tailwind-merge"
@@ -28,7 +28,7 @@ export default function Header() {
           </div>
           <div className=''>
             <h1
-              className={`${merriweather.className} text-[14px] md:text-[22px]`}
+              className={`${banglaHfont.className} text-[14px] md:text-[22px]`}
             >
               <Link href='/'>{SITE_NAME}</Link>
             </h1>

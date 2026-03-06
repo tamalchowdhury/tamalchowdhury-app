@@ -8,8 +8,8 @@ import Script from "next/script"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "BlogKori",
-  description: "BlogKori",
+  title: "তমাল এ চৌধুরী # সহজ ভাষায় প্রোগ্রামিং",
+  description: "তমাল এ চৌধুরী # সহজ ভাষায় প্রোগ্রামিং",
 }
 
 export default function RootLayout({

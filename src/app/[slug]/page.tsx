@@ -5,13 +5,11 @@ import SinglePostComponent from "./single-post"
 import { Metadata } from "next"
 
 type Props = {
-  params: {
-    slug: string
-  }
+  params: Promise<{ slug: string }>
 }
 
-export async function generateMetadata({ params }): Promise<Metadata> {
-  const { slug } = params
+export async function generateMetadata({ params }: { params: Props["params"] }): Promise<Metadata> {
+  const { slug } = await params
   const post = await fetchSinglePost(slug)
 
   if (!post) {
@@ -28,7 +26,7 @@ export async function generateMetadata({ params }): Promise<Metadata> {
 }
 
 export default async function SinglePostPage({ params }: Props) {
-  const { slug } = params
+  const { slug } = await params
 
   return (
     <>

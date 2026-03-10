@@ -13,10 +13,6 @@ export default function Sidebar() {
           <SponsorMeLink />
         </LinksWidget>
       </SidebarWidget>
-      <SidebarWidget>
-        <SidebarHeading>Creator Friends</SidebarHeading>
-        <LinksWidget links={friendsLinks} />
-      </SidebarWidget>
     </aside>
   )
 }

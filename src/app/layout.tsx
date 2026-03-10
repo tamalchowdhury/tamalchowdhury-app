@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "তমাল এ চৌধুরী # সহজ ভাষায় প্রোগ্রামিং",
-  description: "তমাল এ চৌধুরী # সহজ ভাষায় প্রোগ্রামিং",
+  description: "সহজ বাংলা ভাষায় প্রোগ্রামিং এর সব জটিল কনসেপ্ট গুলো লিখে যাচ্ছি। HTML, CSS, JavaScript, Python, PHP, Vibe Coding সহ আরো অনেক কিছু",
 }
 
 export default function RootLayout({
@@ -25,7 +25,7 @@ export default function RootLayout({
          ${inter.className}`}
       >
         <Script
-          src='https://www.googletagmanager.com/gtag/js?id=G-WY5B0MSMKL'
+          src='https://www.googletagmanager.com/gtag/js?id=G-TZFY3QDPLZ'
           strategy='afterInteractive'
         />
         <Script id='google-analytics' strategy='afterInteractive'>
@@ -33,7 +33,7 @@ export default function RootLayout({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-WY5B0MSMKL');
+            gtag('config', 'G-TZFY3QDPLZ');
           `}
         </Script>
         <Header />

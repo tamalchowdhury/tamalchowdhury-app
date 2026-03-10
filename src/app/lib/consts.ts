@@ -1,16 +1,16 @@
 // https://blogkori.com/wp-json/wp/v2/posts
-const siteUrl = "https://cdn.blogkori.com/"
+const siteUrl = "https://wp.tamalchowdhury.com/"
 
 // wordpress rest api url
 export const API_URL = siteUrl + "/wp-json/wp/v2"
 
-export const BASE_URL = "https://www.blogkori.com"
+export const BASE_URL = "https://www.tamalchowdhury.com"
 export const SITE_NAME = "তমাল এ চৌধুরী"
 export const SITE_TAGLINE = "সহজ ভাষায় প্রোগ্রামিং"
 export const AUTHOR_NAME = "তমাল এ চৌধুরী"
 
 // the category ids for the english and bangla posts from wordpress site
 export const ENGLISH_CATEGORY = 16
-export const BANGLA_CATEGORY = 9
+export const BANGLA_CATEGORY = 1
 
-export const HOME_POST_LIMIT = 3
+export const HOME_POST_LIMIT = 10

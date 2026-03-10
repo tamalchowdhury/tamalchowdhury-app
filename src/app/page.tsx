@@ -11,25 +11,14 @@ export default async function Home() {
     <div className='space-y-[40px]'>
       <section>
         <h3
-          className={`${merriweather.className} uppercase -ml-[10px] mb-2 tracking-wider text-[14px]`}
-        >
-          Latest English Posts
-        </h3>
-        <Suspense fallback={<LoadingPosts />}>
-          <HomeEnglishLatestPosts />
-          <ReadAllPosts href='/en'>Read All English Posts</ReadAllPosts>
-        </Suspense>
-      </section>
-      <section>
-        <h3
           className={`${banglaHfont.className} uppercase -ml-[10px] mb-2 tracking-wider text-[18px]`}
         >
-          বাংলা পোস্টগুলো
+          সব পোস্টগুলো
         </h3>
         <Suspense fallback={<LoadingPosts />}>
           <HomeBanglaLatestPosts />
 
-          <ReadAllPosts href='/bn'>সবগুলো বাংলা পোস্ট দেখুন</ReadAllPosts>
+          <ReadAllPosts href='/all'>আরো পোস্ট দেখুন</ReadAllPosts>
         </Suspense>
       </section>
     </div>

@@ -19,9 +19,15 @@ export async function generateMetadata({ params }: { params: Props["params"] }):
     }
   }
 
+  const yoastTitle = post.yoast_head_json?.title?.trim()
+  const pageTitle = post.title?.rendered?.trim() || "Untitled"
+  const fallbackTitle = `${pageTitle} # তমাল চৌধুরীর টেক ব্লগ`
+  const yoastDescription = post.yoast_head_json?.description?.trim()
+  const fallbackDescription = post.excerpt.rendered?.trim() || "Post not found"
+
   return {
-    title: post.title.rendered + " | BlogKori",
-    description: post.excerpt.rendered,
+    title: yoastTitle || fallbackTitle,
+    description: yoastDescription || fallbackDescription,
   }
 }
 

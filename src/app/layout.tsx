@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang='en'>
+    <html lang='bn-BD'>
       <body
         className={`bg-slate-200 text-[#333] h-screen
           

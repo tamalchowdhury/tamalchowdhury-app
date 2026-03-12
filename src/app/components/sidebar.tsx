@@ -1,18 +1,39 @@
+"use client"
+
 import Link from "next/link"
 import React from "react"
+import { usePathname } from "next/navigation"
 import { merriweather } from "../lib/utils"
-import { friendsLinks } from "../lib/friends"
 import { sponsorLinks } from "../lib/sponsors"
+import TableOfContents from "./tableOfContents"
+
+const NON_POST_PATHS = new Set(["/", "/sponsor", "/contact", "/all"])
+
+function isSinglePostPath(pathname: string) {
+  if (!pathname || NON_POST_PATHS.has(pathname)) return false
+
+  const normalized = pathname.replace(/^\/|\/$/g, "")
+  if (!normalized) return false
+
+  return !normalized.includes("/")
+}
 
 export default function Sidebar() {
+  const pathname = usePathname()
+  const showPostTocOnly = isSinglePostPath(pathname)
+
   return (
     <aside className='p-4 md:p-0 md:mt-[50px]'>
-      <SidebarWidget>
-        <SidebarHeading>Sponsors</SidebarHeading>
-        <LinksWidget links={sponsorLinks}>
-          <SponsorMeLink />
-        </LinksWidget>
-      </SidebarWidget>
+      {showPostTocOnly ? (
+        <TableOfContents />
+      ) : (
+        <SidebarWidget>
+          <SidebarHeading>Sponsors</SidebarHeading>
+          <LinksWidget links={sponsorLinks}>
+            <SponsorMeLink />
+          </LinksWidget>
+        </SidebarWidget>
+      )}
     </aside>
   )
 }

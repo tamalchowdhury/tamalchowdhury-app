@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+}
+
 .post__body p {
   @apply my-6;
 }
@@ -15,8 +19,32 @@
   @apply text-2xl font-bold my-6;
 }
 
+.post__body h2[id],
+.post__body h3[id],
+.post__body h4[id] {
+  scroll-margin-top: 1.25rem;
+}
+
 .post__body a {
-  @apply text-accent border-b border-accent border-dashed;
+  @apply text-pink-600 border-b border-pink-600 border-dashed;
+}
+
+.post__body h2 .post-heading-hash,
+.post__body h3 .post-heading-hash,
+.post__body h4 .post-heading-hash {
+  border: 0;
+  opacity: 0;
+  text-decoration: none;
+  transition: opacity 140ms ease, color 140ms ease;
+}
+
+.post__body h2:hover .post-heading-hash,
+.post__body h3:hover .post-heading-hash,
+.post__body h4:hover .post-heading-hash,
+.post__body h2:focus-within .post-heading-hash,
+.post__body h3:focus-within .post-heading-hash,
+.post__body h4:focus-within .post-heading-hash {
+  opacity: 1;
 }
 
 .post__body blockquote {

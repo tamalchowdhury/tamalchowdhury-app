@@ -1,0 +1,304 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { usePathname } from "next/navigation"
+import { merriweather } from "../lib/utils"
+
+type TocItem = {
+  id: string
+  text: string
+  level: 1 | 2 | 3 | 4
+}
+
+const headingSelector = ".post__body h2, .post__body h3, .post__body h4"
+const postTitleSelector = "main h1"
+
+function slugifyHeading(text: string) {
+  const normalized = text
+    .normalize("NFKD")
+    .replace(/[^\p{L}\p{N}\s-]/gu, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .toLowerCase()
+
+  return normalized || "section"
+}
+
+async function copyText(text: string) {
+  if (!text) return false
+
+  try {
+    await navigator.clipboard.writeText(text)
+    return true
+  } catch {
+    try {
+      const fallback = document.createElement("textarea")
+      fallback.value = text
+      fallback.setAttribute("readonly", "")
+      fallback.style.position = "fixed"
+      fallback.style.opacity = "0"
+      document.body.appendChild(fallback)
+      fallback.select()
+      const copied = document.execCommand("copy")
+      document.body.removeChild(fallback)
+      return copied
+    } catch {
+      return false
+    }
+  }
+}
+
+function getPermalink(hashId: string) {
+  return `${window.location.origin}${window.location.pathname}${window.location.search}#${hashId}`
+}
+
+function getHeadingText(heading: HTMLHeadingElement) {
+  const clonedHeading = heading.cloneNode(true) as HTMLHeadingElement
+  clonedHeading.querySelectorAll(".post-heading-hash").forEach((node) => node.remove())
+  return clonedHeading.textContent?.trim() || ""
+}
+
+function getPostTitleItem() {
+  const postTitle = document.querySelector<HTMLHeadingElement>(postTitleSelector)
+  const titleText = postTitle?.textContent?.trim() || ""
+  if (!postTitle || !titleText) return null
+
+  if (!postTitle.id) {
+    postTitle.id = "post-title"
+  }
+
+  return {
+    id: postTitle.id,
+    text: titleText,
+    level: 1 as const,
+  }
+}
+
+function attachHeadingHashLinks(items: TocItem[]) {
+  items.forEach((item) => {
+    if (item.level < 2) return
+
+    const heading = document.getElementById(item.id)
+    if (!heading) return
+
+    const existing = heading.querySelector<HTMLAnchorElement>(".post-heading-hash")
+    const anchor = existing || document.createElement("a")
+
+    anchor.className = "post-heading-hash ml-2 text-[#333]/45 hover:text-pink-600"
+    anchor.href = `#${item.id}`
+    anchor.textContent = "#"
+    anchor.ariaLabel = `Copy link for ${item.text}`
+    anchor.title = "Copy section link"
+
+    if (!anchor.dataset.copyBound) {
+      anchor.dataset.copyBound = "true"
+      anchor.addEventListener("click", (event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        void copyText(getPermalink(item.id))
+      })
+    }
+
+    if (!existing) heading.appendChild(anchor)
+  })
+}
+
+function createTocFromDom() {
+  const headings = Array.from(
+    document.querySelectorAll<HTMLHeadingElement>(headingSelector),
+  )
+
+  const titleItem = getPostTitleItem()
+  if (!titleItem && !headings.length) return []
+
+  const usedIds = new Map<string, number>()
+  const items: TocItem[] = []
+
+  if (titleItem) {
+    usedIds.set(titleItem.id, 1)
+    items.push(titleItem)
+  }
+
+  headings.forEach((heading) => {
+    const text = getHeadingText(heading)
+    if (!text) return
+
+    const level = Number(heading.tagName[1]) as TocItem["level"]
+    if (level < 2 || level > 4) return
+
+    const preferredId = heading.id || slugifyHeading(text)
+    const currentCount = usedIds.get(preferredId) || 0
+    const finalId = currentCount === 0 ? preferredId : `${preferredId}-${currentCount}`
+
+    usedIds.set(preferredId, currentCount + 1)
+    heading.id = finalId
+
+    items.push({
+      id: finalId,
+      text,
+      level,
+    })
+  })
+
+  attachHeadingHashLinks(items)
+  return items
+}
+
+function areItemsEqual(a: TocItem[], b: TocItem[]) {
+  if (a.length !== b.length) return false
+
+  for (let i = 0; i < a.length; i += 1) {
+    if (
+      a[i].id !== b[i].id ||
+      a[i].text !== b[i].text ||
+      a[i].level !== b[i].level
+    ) {
+      return false
+    }
+  }
+
+  return true
+}
+
+function getActiveHeadingId(items: TocItem[]) {
+  const offset = 140
+  const scrollBottom = window.scrollY + window.innerHeight
+  const pageBottom = document.documentElement.scrollHeight
+  const isNearPageBottom = scrollBottom >= pageBottom - 6
+
+  if (isNearPageBottom && items.length) {
+    return items[items.length - 1].id
+  }
+
+  let activeId = items[0]?.id || ""
+
+  for (const item of items) {
+    const heading = document.getElementById(item.id)
+    if (!heading) continue
+
+    const top = heading.getBoundingClientRect().top
+    if (top - offset <= 0) {
+      activeId = item.id
+    } else {
+      break
+    }
+  }
+
+  return activeId
+}
+
+export default function TableOfContents() {
+  const pathname = usePathname()
+  const [items, setItems] = useState<TocItem[]>([])
+  const [activeId, setActiveId] = useState("")
+
+  useEffect(() => {
+    let refreshDebounce: number | null = null
+    let rafId: number | null = null
+
+    const refreshToc = () => {
+      const nextItems = createTocFromDom()
+      setItems((currentItems) =>
+        areItemsEqual(currentItems, nextItems) ? currentItems : nextItems,
+      )
+      setActiveId(getActiveHeadingId(nextItems))
+    }
+
+    rafId = window.requestAnimationFrame(refreshToc)
+
+    const observer = new MutationObserver(() => {
+      if (refreshDebounce !== null) window.clearTimeout(refreshDebounce)
+      refreshDebounce = window.setTimeout(refreshToc, 80)
+    })
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    })
+
+    const fallbackTimers: number[] = [140, 320, 700, 1300].map((delay) =>
+      window.setTimeout(refreshToc, delay),
+    )
+
+    return () => {
+      observer.disconnect()
+      fallbackTimers.forEach((timer) => window.clearTimeout(timer))
+      if (rafId !== null) window.cancelAnimationFrame(rafId)
+      if (refreshDebounce !== null) window.clearTimeout(refreshDebounce)
+    }
+  }, [pathname])
+
+  useEffect(() => {
+    if (!items.length) return
+
+    const onScroll = () => {
+      setActiveId(getActiveHeadingId(items))
+    }
+
+    const onHashChange = () => {
+      const hashId = window.location.hash.replace(/^#/, "")
+      if (hashId) {
+        setActiveId(hashId)
+        return
+      }
+      setActiveId(getActiveHeadingId(items))
+    }
+
+    onScroll()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    window.addEventListener("resize", onScroll)
+    window.addEventListener("hashchange", onHashChange)
+
+    return () => {
+      window.removeEventListener("scroll", onScroll)
+      window.removeEventListener("resize", onScroll)
+      window.removeEventListener("hashchange", onHashChange)
+    }
+  }, [items])
+
+  if (!items.length) return null
+
+  return (
+    <div className='mb-8 md:sticky md:top-6 max-h-[calc(100vh-2rem)] overflow-auto pr-2'>
+      <h3 className={`${merriweather.className} font-bold mb-2`}>পেজের সব অংশসমূহ</h3>
+      <nav aria-label='পেজের সব অংশসমূহ'>
+        <ul className='space-y-1'>
+          {items.map((item) => {
+            const isActive = activeId === item.id
+            const indicatorClass =
+              item.level === 3 || item.level === 4
+                ? isActive
+                  ? "border-l-2 border-pink-600"
+                  : "border-l border-[#333]/20"
+                : isActive
+                  ? "border-l-2 border-pink-600"
+                  : "border-l-2 border-transparent"
+            const levelClass =
+              item.level === 1
+                ? "pl-2"
+                : item.level === 2
+                  ? "pl-2"
+                  : item.level === 3
+                    ? "ml-3 pl-3"
+                    : "ml-6 pl-3"
+
+            return (
+              <li key={item.id} className='text-[14px]'>
+                <a
+                  href={`#${item.id}`}
+                  className={`block transition ${indicatorClass} ${levelClass} ${
+                    isActive ? "text-[#111]" : "text-[#333]/70 hover:text-[#111]"
+                  }`}
+                >
+                  {item.text}
+                </a>
+              </li>
+            )
+          })}
+        </ul>
+      </nav>
+    </div>
+  )
+}

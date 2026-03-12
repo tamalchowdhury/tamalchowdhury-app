@@ -37,7 +37,7 @@ export default function Header() {
             </div>
           </div>
         </div>
-        <nav className='md:ml-auto w-full md:w-auto overflow-x-auto'>
+        <nav className='md:ml-auto w-full md:w-auto overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'>
           <ul className='flex gap-1.5 md:gap-8 min-w-max md:min-w-0 pb-1 md:pb-0'>
             {menuPaths.map((page) => (
               <li key={page.url}>

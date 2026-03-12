@@ -14,3 +14,4 @@ export const ENGLISH_CATEGORY = 16
 export const BANGLA_CATEGORY = 1
 
 export const HOME_POST_LIMIT = 10
+export const WP_REVALIDATE_SECONDS = 120

@@ -1,14 +1,16 @@
 import React from "react"
-import { fetchSinglePost, merriweather, prettyDate } from "../lib/utils"
+import { prettyDate } from "../lib/utils"
 import { AUTHOR_NAME, BANGLA_CATEGORY } from "../lib/consts"
 import { banglaHfont } from "@/fonts/fonts"
 import ShareButtons from "./components/share-buttons"
 import Image from "next/image"
 import { EnglishTitle } from "../components/english-title"
 import PostContent from "./components/post-content"
+import { notFound } from "next/navigation"
 
 type Props = {
   slug: string
+  post: any
 }
 
 function isExternalLink(href: string) {
@@ -89,11 +91,9 @@ function conditionalDateByline(publishedDate: string, updatedDate: string) {
   return `প্রথম প্রকাশঃ ${prettyDate(publishedDate)} # সর্বশেষ আপডেটঃ ${prettyDate(updatedDate)}`
 }
 
-export default async function SinglePostComponent({ slug }: Props) {
-  const post = await fetchSinglePost(slug)
-
+export default function SinglePostComponent({ slug, post }: Props) {
   if (!post) {
-    return <div>Post not found</div>
+    notFound()
   }
 
   // needs to implement a better solution here

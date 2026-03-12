@@ -10,8 +10,8 @@ type TocItem = {
   level: 1 | 2 | 3 | 4
 }
 
-const headingSelector = ".post__body h2, .post__body h3, .post__body h4"
 const postTitleSelector = "main h1"
+const postBodySelector = ".post__body"
 
 function slugifyHeading(text: string) {
   const normalized = text
@@ -105,9 +105,10 @@ function attachHeadingHashLinks(items: TocItem[]) {
 }
 
 function createTocFromDom() {
-  const headings = Array.from(
-    document.querySelectorAll<HTMLHeadingElement>(headingSelector),
-  )
+  const postBody = document.querySelector(postBodySelector)
+  if (!postBody) return []
+
+  const headings = Array.from(postBody.querySelectorAll<HTMLHeadingElement>("h2, h3, h4"))
 
   const titleItem = getPostTitleItem()
   if (!titleItem && !headings.length) return []
@@ -213,11 +214,13 @@ export default function TableOfContents() {
       refreshDebounce = window.setTimeout(refreshToc, 80)
     })
 
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-    })
+    const postBody = document.querySelector(postBodySelector)
+    if (postBody) {
+      observer.observe(postBody, {
+        childList: true,
+        subtree: true,
+      })
+    }
 
     const fallbackTimers: number[] = [140, 320, 700, 1300].map((delay) =>
       window.setTimeout(refreshToc, delay),
@@ -234,8 +237,21 @@ export default function TableOfContents() {
   useEffect(() => {
     if (!items.length) return
 
+    let scrollRafId: number | null = null
+
+    const refreshActiveId = () => {
+      setActiveId((currentId) => {
+        const nextId = getActiveHeadingId(items)
+        return currentId === nextId ? currentId : nextId
+      })
+    }
+
     const onScroll = () => {
-      setActiveId(getActiveHeadingId(items))
+      if (scrollRafId !== null) return
+      scrollRafId = window.requestAnimationFrame(() => {
+        scrollRafId = null
+        refreshActiveId()
+      })
     }
 
     const onHashChange = () => {
@@ -244,15 +260,18 @@ export default function TableOfContents() {
         setActiveId(hashId)
         return
       }
-      setActiveId(getActiveHeadingId(items))
+      refreshActiveId()
     }
 
-    onScroll()
+    refreshActiveId()
     window.addEventListener("scroll", onScroll, { passive: true })
     window.addEventListener("resize", onScroll)
     window.addEventListener("hashchange", onHashChange)
 
     return () => {
+      if (scrollRafId !== null) {
+        window.cancelAnimationFrame(scrollRafId)
+      }
       window.removeEventListener("scroll", onScroll)
       window.removeEventListener("resize", onScroll)
       window.removeEventListener("hashchange", onHashChange)

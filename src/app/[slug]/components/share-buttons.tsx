@@ -1,4 +1,3 @@
-import Link from "next/link"
 import React from "react"
 import CopyButton from "./copy-button"
 import MoreButton from "./more-button"
@@ -17,21 +16,23 @@ export default function ShareButtons({ slug, title, content }) {
         Sharing is Caring:
       </h2>
       <div className='buttons grid grid-cols-1 sm:flex sm:flex-wrap gap-2 my-4'>
-        <Link
+        <a
           href={fbUrl}
           target='_blank'
+          rel='noopener noreferrer'
           className='fb share-button bg-blue-500/70 hover:bg-blue-500 '
         >
           Facebook
           <FbIcon />
-        </Link>
-        <Link
+        </a>
+        <a
           href={waUrl}
           target='_blank'
+          rel='noopener noreferrer'
           className='wa share-button bg-green-700/70 hover:bg-green-700'
         >
           WhatsApp <WaIcon />
-        </Link>
+        </a>
         <CopyButton title={title} content={content} url={url} slug={slug} />
         <MoreButton url={url} />
       </div>

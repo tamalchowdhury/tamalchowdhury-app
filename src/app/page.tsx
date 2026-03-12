@@ -11,7 +11,7 @@ export default async function Home() {
     <div className='space-y-[40px]'>
       <section>
         <h3
-          className={`${banglaHfont.className} uppercase -ml-[10px] mb-2 tracking-wider text-[18px]`}
+          className={`${banglaHfont.className} uppercase sm:-ml-[10px] mb-2 tracking-wider text-[16px] sm:text-[18px]`}
         >
           সব পোস্টগুলো
         </h3>
@@ -29,7 +29,7 @@ function ReadAllPosts({ children, href }) {
   return (
     <Link
       href={href}
-      className='block text-center bg-accent/10 p-4 rounded-md my-8 hover:bg-accent/40 transition hover:font-bold hover:shadow-md'
+      className='block text-center bg-accent/10 p-3 sm:p-4 rounded-md my-8 hover:bg-accent/40 transition hover:font-bold hover:shadow-md'
     >
       {children}
     </Link>

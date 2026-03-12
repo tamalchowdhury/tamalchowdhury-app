@@ -23,7 +23,7 @@ export default function Sidebar() {
   const showPostTocOnly = isSinglePostPath(pathname)
 
   return (
-    <aside className='p-4 md:p-0 md:mt-[50px]'>
+    <aside className='px-4 pt-5 pb-4 border-t border-slate-200 md:border-0 md:p-0 md:mt-[50px] min-w-0'>
       {showPostTocOnly ? (
         <TableOfContents />
       ) : (

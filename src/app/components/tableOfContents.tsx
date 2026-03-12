@@ -192,6 +192,7 @@ export default function TableOfContents() {
   const pathname = usePathname()
   const [items, setItems] = useState<TocItem[]>([])
   const [activeId, setActiveId] = useState("")
+  const [isMobileOpen, setIsMobileOpen] = useState(false)
 
   useEffect(() => {
     let refreshDebounce: number | null = null
@@ -261,9 +262,26 @@ export default function TableOfContents() {
   if (!items.length) return null
 
   return (
-    <div className='mb-8 md:sticky md:top-6 max-h-[calc(100vh-2rem)] overflow-auto pr-2'>
-      <h3 className={`${merriweather.className} font-bold mb-2`}>পেজের সব অংশসমূহ</h3>
-      <nav aria-label='পেজের সব অংশসমূহ'>
+    <div className='mb-8 md:sticky md:top-6'>
+      <div className='flex items-center justify-between mb-2'>
+        <h3 className={`${merriweather.className} font-bold`}>
+          পেজের সব অংশসমূহ
+        </h3>
+        <button
+          type='button'
+          className='md:hidden text-[13px] font-medium text-pink-700 border border-pink-200 rounded px-2 py-1'
+          onClick={() => setIsMobileOpen((current) => !current)}
+          aria-expanded={isMobileOpen}
+          aria-controls='mobile-post-toc'
+        >
+          {isMobileOpen ? "বন্ধ করুন" : "দেখুন"}
+        </button>
+      </div>
+      <nav
+        id='mobile-post-toc'
+        aria-label='পেজের সব অংশসমূহ'
+        className={`${isMobileOpen ? "block" : "hidden"} md:block max-h-[45vh] md:max-h-[calc(100vh-2rem)] overflow-auto pr-1 md:pr-2`}
+      >
         <ul className='space-y-1'>
           {items.map((item) => {
             const isActive = activeId === item.id
@@ -285,12 +303,13 @@ export default function TableOfContents() {
                     : "ml-6 pl-3"
 
             return (
-              <li key={item.id} className='text-[14px]'>
+              <li key={item.id} className='text-[13px] md:text-[14px] leading-snug'>
                 <a
                   href={`#${item.id}`}
-                  className={`block transition ${indicatorClass} ${levelClass} ${
+                  className={`block transition break-words ${indicatorClass} ${levelClass} ${
                     isActive ? "text-[#111]" : "text-[#333]/70 hover:text-[#111]"
                   }`}
+                  onClick={() => setIsMobileOpen(false)}
                 >
                   {item.text}
                 </a>

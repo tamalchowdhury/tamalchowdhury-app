@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang='bn-BD'>
       <body
-        className={`bg-slate-200 text-[#333] h-screen
+        className={`bg-slate-200 text-[#333] min-h-screen
           
          ${inter.className}`}
       >
@@ -37,8 +37,10 @@ export default function RootLayout({
           `}
         </Script>
         <Header />
-        <div className='grid md:grid-cols-[650px_1fr] gap-[40px] bg-white min-h-[600px] max-w-[1050px] mx-auto md:px-[80px] md:py-[40px]'>
-          <main className='  min-h-full p-4 leading-relaxed'>{children}</main>
+        <div className='grid grid-cols-1 lg:grid-cols-[minmax(0,650px)_minmax(0,1fr)] gap-0 lg:gap-[40px] bg-white min-h-[600px] max-w-[1050px] mx-auto px-0 sm:px-4 lg:px-[80px] py-4 lg:py-[40px]'>
+          <main className='min-h-full min-w-0 p-4 sm:p-5 lg:p-0 leading-relaxed'>
+            {children}
+          </main>
           <Sidebar />
         </div>
       </body>

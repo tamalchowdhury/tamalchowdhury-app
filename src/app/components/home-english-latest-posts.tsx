@@ -29,7 +29,7 @@ export default async function HomeEnglishLatestPosts({ all = false}) {
         <div className='space-y-[20px]' key={p.id}>
           <Link href={`/${p.slug}`}>
             <h2
-              className={`${merriweather.className} text-[28px] leading-tight font-bold hover:underline`}
+              className={`${merriweather.className} text-[24px] sm:text-[28px] leading-tight font-bold hover:underline`}
             >
               {p.title.rendered}
             </h2>

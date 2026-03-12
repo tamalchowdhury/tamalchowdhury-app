@@ -25,6 +25,13 @@ html {
   scroll-margin-top: 1.25rem;
 }
 
+.post__body img,
+.post__body iframe,
+.post__body video {
+  max-width: 100%;
+  height: auto;
+}
+
 .post__body a {
   @apply text-pink-600 border-b border-pink-600 border-dashed;
 }
@@ -137,6 +144,15 @@ html {
 .post__body .wp-block-table tr:first-child td {
   @apply bg-gray-200 font-semibold uppercase text-[0.82em];
   letter-spacing: 0.03em;
+}
+
+@media (max-width: 767px) {
+  .post__body .wp-block-table tr:first-child td,
+  .post__body .wp-block-table thead th {
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
 }
 
 .post__body .wp-block-table tr:last-child th,
@@ -279,5 +295,5 @@ html {
 /* social share buttons */
 
 .share-button {
-  @apply flex gap-2 items-center py-2 pl-4 pr-3 rounded-full text-white/80 hover:text-white cursor-pointer transition;
+  @apply inline-flex w-full sm:w-auto justify-center sm:justify-start gap-2 items-center py-2 pl-4 pr-3 rounded-full text-white/80 hover:text-white cursor-pointer transition;
 }

@@ -109,26 +109,26 @@ export default async function SinglePostComponent({ slug }: Props) {
           <EnglishTitle>{post.title.rendered}</EnglishTitle>
         )}
 
-        <div className='flex gap-[10px] items-center text-[14px] text-[#333]/70'>
+        <div className='flex gap-[10px] items-start sm:items-center text-[13px] sm:text-[14px] text-[#333]/70'>
           <div>
             <Image
               src='/img/author.jpg'
               alt='Tamal Chowdhury'
               width={48}
               height={48}
-              className='rounded-full object-cover'
+              className='rounded-full object-cover w-10 h-10 sm:w-12 sm:h-12'
             />
           </div>
-          <div>
+          <div className='min-w-0'>
             <div className='italic'>লেখক: {AUTHOR_NAME}</div>
-            <div className='uppercase text-[14px]'>
+            <div className='uppercase text-[12px] sm:text-[14px]'>
               {conditionalDateByline(post.date, post.modified)}
             </div>
           </div>
         </div>
 
         <PostContent
-          className='post__body text-[16px] md:text-[20px]'
+          className='post__body text-[16px] md:text-[20px] overflow-x-hidden'
           html={transformedPostContent}
         />
       </div>
@@ -144,7 +144,7 @@ export default async function SinglePostComponent({ slug }: Props) {
 export function BanglaTitle({ children, className = "" }) {
   return (
     <h1
-      className={`text-[28px] md:text-[38px] font-bold leading-tight ${banglaHfont.className} ${className}`}
+      className={`text-[24px] sm:text-[28px] md:text-[38px] font-bold leading-tight ${banglaHfont.className} ${className}`}
     >
       {children}
     </h1>

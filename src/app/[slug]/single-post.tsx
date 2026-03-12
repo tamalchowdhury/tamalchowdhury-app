@@ -132,11 +132,7 @@ export default function SinglePostComponent({ slug, post }: Props) {
           html={transformedPostContent}
         />
       </div>
-      <ShareButtons
-        slug={slug}
-        title={post.title.rendered}
-        content={post.content.rendered}
-      />
+      <ShareButtons slug={slug} />
     </>
   )
 }

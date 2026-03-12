@@ -5,9 +5,76 @@ import { banglaHfont } from "@/fonts/fonts"
 import ShareButtons from "./components/share-buttons"
 import Image from "next/image"
 import { EnglishTitle } from "../components/english-title"
+import PostContent from "./components/post-content"
 
 type Props = {
   slug: string
+}
+
+function isExternalLink(href: string) {
+  if (
+    !href ||
+    href.startsWith("#") ||
+    href.startsWith("/") ||
+    href.startsWith("mailto:") ||
+    href.startsWith("tel:") ||
+    href.startsWith("javascript:")
+  ) {
+    return false
+  }
+
+  try {
+    const url = new URL(href, "https://tamalanwar.com")
+    const isHttp = url.protocol === "http:" || url.protocol === "https:"
+    const hostname = url.hostname.replace(/^www\./, "").toLowerCase()
+
+    return isHttp && hostname !== "tamalanwar.com"
+  } catch {
+    return false
+  }
+}
+
+function normalizeExternalAnchor(anchorTag: string) {
+  let updated = anchorTag
+
+  if (/\btarget\s*=/i.test(updated)) {
+    updated = updated.replace(
+      /\btarget\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/i,
+      'target="_blank"',
+    )
+  } else {
+    updated = updated.replace(/<a\b/i, '<a target="_blank"')
+  }
+
+  if (/\brel\s*=/i.test(updated)) {
+    updated = updated.replace(
+      /\brel\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/i,
+      (_match, _full, doubleQuoted, singleQuoted, bare) => {
+        const relValue = (doubleQuoted || singleQuoted || bare || "").trim()
+        const relParts = new Set(relValue.split(/\s+/).filter(Boolean))
+        relParts.add("noopener")
+        relParts.add("noreferrer")
+        return `rel="${Array.from(relParts).join(" ")}"`
+      },
+    )
+  } else {
+    updated = updated.replace(/<a\b/i, '<a rel="noopener noreferrer"')
+  }
+
+  return updated
+}
+
+function transformExternalLinks(html: string) {
+  return html.replace(/<a\b[^>]*>/gi, (anchorTag) => {
+    const hrefMatch = anchorTag.match(
+      /\bhref\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/i,
+    )
+    const href = hrefMatch?.[2] || hrefMatch?.[3] || hrefMatch?.[4] || ""
+
+    if (!isExternalLink(href)) return anchorTag
+
+    return normalizeExternalAnchor(anchorTag)
+  })
 }
 
 function conditionalDateByline(publishedDate: string, updatedDate: string) {
@@ -31,6 +98,7 @@ export default async function SinglePostComponent({ slug }: Props) {
 
   // needs to implement a better solution here
   const isBangla = post.categories.includes(BANGLA_CATEGORY)
+  const transformedPostContent = transformExternalLinks(post.content.rendered)
 
   return (
     <>
@@ -59,9 +127,9 @@ export default async function SinglePostComponent({ slug }: Props) {
           </div>
         </div>
 
-        <div
+        <PostContent
           className='post__body text-[16px] md:text-[20px]'
-          dangerouslySetInnerHTML={{ __html: post.content.rendered }}
+          html={transformedPostContent}
         />
       </div>
       <ShareButtons

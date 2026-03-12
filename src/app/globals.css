@@ -32,6 +32,19 @@ html {
   height: auto;
 }
 
+.post__body .wp-block-embed.is-provider-youtube .wp-block-embed__wrapper iframe {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+
+@media (min-width: 1024px) {
+  .post__body .wp-block-embed.is-provider-youtube .wp-block-embed__wrapper {
+    max-width: 640px;
+  }
+}
+
 .post__body a {
   @apply text-pink-600 border-b border-pink-600 border-dashed;
 }

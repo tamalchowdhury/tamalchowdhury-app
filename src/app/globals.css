@@ -49,6 +49,15 @@ html {
   @apply text-pink-600 border-b border-pink-600 border-dashed;
 }
 
+.post__body a.post-external-link::after {
+  content: "◱";
+  display: inline-block;
+  margin-left: 0.15em;
+  font-size: 0.78em;
+  line-height: 1;
+  vertical-align: text-top;
+}
+
 .post__body h2 .post-heading-hash,
 .post__body h3 .post-heading-hash,
 .post__body h4 .post-heading-hash {

@@ -13,6 +13,33 @@ type Props = {
   post: any
 }
 
+const INTERNAL_HOSTS = new Set([
+  "tamalchowdhury.com",
+  "www.tamalchowdhury.com",
+  "wp.tamalchowdhury.com",
+])
+
+function getInternalPath(href: string) {
+  if (!href) return null
+  if (href.startsWith("/")) return href
+  if (href.startsWith("#")) return href
+
+  try {
+    const url = new URL(href, "https://www.tamalchowdhury.com")
+    const isHttp = url.protocol === "http:" || url.protocol === "https:"
+    const hostname = url.hostname.replace(/^www\./, "").toLowerCase()
+    const normalizedHost = hostname === "tamalchowdhury.com" ? "tamalchowdhury.com" : hostname
+
+    if (!isHttp || !INTERNAL_HOSTS.has(normalizedHost) && !INTERNAL_HOSTS.has(url.hostname.toLowerCase())) {
+      return null
+    }
+
+    return `${url.pathname}${url.search}${url.hash}`
+  } catch {
+    return null
+  }
+}
+
 function isExternalLink(href: string) {
   if (
     !href ||
@@ -63,6 +90,35 @@ function normalizeExternalAnchor(anchorTag: string) {
     updated = updated.replace(/<a\b/i, '<a rel="noopener noreferrer"')
   }
 
+  if (/\bclass\s*=/i.test(updated)) {
+    updated = updated.replace(
+      /\bclass\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/i,
+      (_match, _full, doubleQuoted, singleQuoted, bare) => {
+        const classValue = (doubleQuoted || singleQuoted || bare || "").trim()
+        const classes = new Set(classValue.split(/\s+/).filter(Boolean))
+        classes.add("post-external-link")
+        return `class="${Array.from(classes).join(" ")}"`
+      },
+    )
+  } else {
+    updated = updated.replace(/<a\b/i, '<a class="post-external-link"')
+  }
+
+  return updated
+}
+
+function normalizeInternalAnchor(anchorTag: string, internalPath: string) {
+  let updated = anchorTag
+
+  if (/\bhref\s*=/i.test(updated)) {
+    updated = updated.replace(
+      /\bhref\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/i,
+      `href="${internalPath}"`,
+    )
+  }
+
+  updated = updated.replace(/\s+target\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/i, "")
+
   return updated
 }
 
@@ -72,6 +128,11 @@ function transformExternalLinks(html: string) {
       /\bhref\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/i,
     )
     const href = hrefMatch?.[2] || hrefMatch?.[3] || hrefMatch?.[4] || ""
+    const internalPath = getInternalPath(href)
+
+    if (internalPath) {
+      return normalizeInternalAnchor(anchorTag, internalPath)
+    }
 
     if (!isExternalLink(href)) return anchorTag
 

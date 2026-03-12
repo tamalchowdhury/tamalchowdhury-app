@@ -1,10 +1,38 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
+import { BASE_URL } from "@/app/lib/consts"
 
 type Props = {
   html: string
   className?: string
+}
+
+const INTERNAL_HOSTS = new Set([
+  "tamalchowdhury.com",
+  "www.tamalchowdhury.com",
+  "wp.tamalchowdhury.com",
+])
+
+function getInternalPathFromHref(href: string) {
+  if (!href) return null
+  if (href.startsWith("/")) return href
+  if (href.startsWith("#")) return href
+  if (href.startsWith("mailto:") || href.startsWith("tel:")) return null
+
+  try {
+    const url = new URL(href, BASE_URL)
+    const isHttp = url.protocol === "http:" || url.protocol === "https:"
+    if (!isHttp) return null
+
+    const hostname = url.hostname.toLowerCase()
+    if (!INTERNAL_HOSTS.has(hostname)) return null
+
+    return `${url.pathname}${url.search}${url.hash}`
+  } catch {
+    return null
+  }
 }
 
 function getTableTsv(table: HTMLTableElement) {
@@ -52,6 +80,7 @@ function makeCopyButton(label = "Copy", extraClass = "") {
 
 export default function PostContent({ html, className = "" }: Props) {
   const contentRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
 
   useEffect(() => {
     const root = contentRef.current
@@ -100,10 +129,45 @@ export default function PostContent({ html, className = "" }: Props) {
         addCopyHandler(button, () => getTableTsv(table))
       })
 
+    root.querySelectorAll<HTMLAnchorElement>("a[href]").forEach((anchor) => {
+      const rawHref = anchor.getAttribute("href") || ""
+      const internalPath = getInternalPathFromHref(rawHref)
+      if (!internalPath) return
+
+      anchor.setAttribute("href", internalPath)
+
+      if (!anchor.getAttribute("target")) {
+        void router.prefetch(internalPath)
+      }
+
+      const onClick = (event: MouseEvent) => {
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey ||
+          anchor.hasAttribute("download")
+        ) {
+          return
+        }
+
+        const target = anchor.getAttribute("target")
+        if (target && target !== "_self") return
+
+        event.preventDefault()
+        router.push(internalPath)
+      }
+
+      anchor.addEventListener("click", onClick)
+      removeListeners.push(() => anchor.removeEventListener("click", onClick))
+    })
+
     return () => {
       removeListeners.forEach((remove) => remove())
     }
-  }, [html])
+  }, [html, router])
 
   return (
     <div

@@ -19,6 +19,27 @@
   @apply text-accent border-b border-accent border-dashed;
 }
 
+.post__body blockquote {
+  @apply my-6 rounded-xl p-5 md:p-6 text-[0.92em];
+  background-color: #e8eef8;
+  border: 1px solid #c9d6ec;
+  color: #143b85;
+}
+
+.post__body blockquote p {
+  margin: 0;
+}
+
+.post__body blockquote p.warning {
+  color: #8a5a06;
+}
+
+.post__body blockquote:has(p.warning) {
+  background-color: rgb(255, 244, 219);
+  border: 0;
+  color: rgb(149, 104, 14);
+}
+
 .post__body ul,
 .post__body ol {
   @apply my-6;

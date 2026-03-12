@@ -53,11 +53,11 @@ function isExternalLink(href: string) {
   }
 
   try {
-    const url = new URL(href, "https://tamalanwar.com")
+    const url = new URL(href, "https://tamalchowdhury.com")
     const isHttp = url.protocol === "http:" || url.protocol === "https:"
     const hostname = url.hostname.replace(/^www\./, "").toLowerCase()
 
-    return isHttp && hostname !== "tamalanwar.com"
+    return isHttp && hostname !== "tamalchowdhury.com"
   } catch {
     return false
   }

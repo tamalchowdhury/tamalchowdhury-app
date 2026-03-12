@@ -155,7 +155,6 @@ html {
   @apply px-3 py-2 align-top;
   border-bottom: 1px solid #d1d5db;
   overflow-wrap: anywhere;
-  word-break: break-word;
 }
 
 .post__body .wp-block-table th:not(:last-child),

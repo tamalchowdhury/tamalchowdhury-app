@@ -73,6 +73,7 @@ function makeCopyButton(label = "Copy", extraClass = "") {
   const button = document.createElement("button")
   button.type = "button"
   button.className = `post-copy-button ${extraClass}`.trim()
+  button.setAttribute("data-post-copy-managed", "true")
   button.innerHTML =
     `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 1H6a2 2 0 0 0-2 2v12h2V3h10V1zm3 4H10a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H10V7h9v14z"/></svg><span>${label}</span>`
   return button
@@ -87,6 +88,13 @@ export default function PostContent({ html, className = "" }: Props) {
     if (!root) return
 
     const removeListeners: Array<() => void> = []
+    const removeButtons: Array<() => void> = []
+
+    root
+      .querySelectorAll<HTMLButtonElement>(
+        'button.post-copy-button[data-post-copy-managed="true"]',
+      )
+      .forEach((button) => button.remove())
 
     const addCopyHandler = (
       button: HTMLButtonElement,
@@ -112,6 +120,7 @@ export default function PostContent({ html, className = "" }: Props) {
       pre.classList.add("has-copy-button")
       const button = makeCopyButton()
       pre.appendChild(button)
+      removeButtons.push(() => button.remove())
 
       addCopyHandler(button, () => pre.querySelector("code")?.textContent || "")
     })
@@ -125,6 +134,7 @@ export default function PostContent({ html, className = "" }: Props) {
         tableWrapper.classList.add("has-copy-button")
         const button = makeCopyButton("Copy table", "post-copy-button--table")
         tableWrapper.appendChild(button)
+        removeButtons.push(() => button.remove())
 
         addCopyHandler(button, () => getTableTsv(table))
       })
@@ -166,6 +176,7 @@ export default function PostContent({ html, className = "" }: Props) {
 
     return () => {
       removeListeners.forEach((remove) => remove())
+      removeButtons.forEach((remove) => remove())
     }
   }, [html, router])
 

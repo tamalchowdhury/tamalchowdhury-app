@@ -7,7 +7,20 @@ export const API_URL = siteUrl + "/wp-json/wp/v2"
 export const BASE_URL = "https://www.tamalchowdhury.com"
 export const SITE_NAME = "তমাল এ চৌধুরী"
 export const SITE_TAGLINE = "সহজ ভাষায় প্রোগ্রামিং"
-export const AUTHOR_NAME = "তমাল এ চৌধুরী"
+export const AUTHOR_NAME_BN = "তমাল এ চৌধুরী"
+export const AUTHOR_NAME_EN = "Tamal A. Chowdhury"
+export const AUTHOR_NAME = AUTHOR_NAME_BN
+export const AUTHOR_SAME_AS = [
+  "https://www.facebook.com/tamalchowdhury.profile",
+  "https://www.linkedin.com/in/tamalchowdhury",
+  "https://x.com/tamalchow",
+  "https://www.instagram.com/tamal.anwar.chowdhury",
+  "https://www.github.com/tamalchowdhury",
+  "https://www.udemy.com/user/tamalanwar",
+  "https://www.youtube.com/@tamalchowdhury",
+  "https://tamalchowdhury.medium.com/",
+
+]
 
 // the category ids for the english and bangla posts from wordpress site
 export const ENGLISH_CATEGORY = 16

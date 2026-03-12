@@ -3,7 +3,7 @@ import { fetchPostSlugs, fetchSinglePost } from "../lib/utils"
 import LoadingSinglePost from "./loading-single-post"
 import SinglePostComponent from "./single-post"
 import { Metadata } from "next"
-import { BASE_URL, HOME_POST_LIMIT } from "../lib/consts"
+import { AUTHOR_NAME_BN, AUTHOR_NAME_EN, BASE_URL, HOME_POST_LIMIT } from "../lib/consts"
 import { cache } from "react"
 import { notFound } from "next/navigation"
 
@@ -50,6 +50,8 @@ export async function generateMetadata({ params }: { params: Props["params"] }):
     metadataBase: new URL(BASE_URL),
     title: metaTitle,
     description: metaDescription,
+    authors: [{ name: AUTHOR_NAME_EN }, { name: AUTHOR_NAME_BN }],
+    creator: AUTHOR_NAME_EN,
     alternates: {
       canonical: canonicalUrl,
     },
@@ -64,6 +66,7 @@ export async function generateMetadata({ params }: { params: Props["params"] }):
           url: ogImage,
         },
       ],
+      authors: [AUTHOR_NAME_EN, AUTHOR_NAME_BN],
     },
     twitter: {
       card: "summary_large_image",

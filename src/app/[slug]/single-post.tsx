@@ -7,37 +7,12 @@ import Image from "next/image"
 import { EnglishTitle } from "../components/english-title"
 import PostContent from "./components/post-content"
 import { notFound } from "next/navigation"
+import { getInternalPath } from "./lib/internal-links"
+import { parseFragment } from "parse5"
 
 type Props = {
   slug: string
   post: any
-}
-
-const INTERNAL_HOSTS = new Set([
-  "tamalchowdhury.com",
-  "www.tamalchowdhury.com",
-  "wp.tamalchowdhury.com",
-])
-
-function getInternalPath(href: string) {
-  if (!href) return null
-  if (href.startsWith("/")) return href
-  if (href.startsWith("#")) return href
-
-  try {
-    const url = new URL(href, "https://www.tamalchowdhury.com")
-    const isHttp = url.protocol === "http:" || url.protocol === "https:"
-    const hostname = url.hostname.replace(/^www\./, "").toLowerCase()
-    const normalizedHost = hostname === "tamalchowdhury.com" ? "tamalchowdhury.com" : hostname
-
-    if (!isHttp || !INTERNAL_HOSTS.has(normalizedHost) && !INTERNAL_HOSTS.has(url.hostname.toLowerCase())) {
-      return null
-    }
-
-    return `${url.pathname}${url.search}${url.hash}`
-  } catch {
-    return null
-  }
 }
 
 function isExternalLink(href: string) {
@@ -122,22 +97,94 @@ function normalizeInternalAnchor(anchorTag: string, internalPath: string) {
   return updated
 }
 
-function transformExternalLinks(html: string) {
-  return html.replace(/<a\b[^>]*>/gi, (anchorTag) => {
-    const hrefMatch = anchorTag.match(
-      /\bhref\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/i,
-    )
-    const href = hrefMatch?.[2] || hrefMatch?.[3] || hrefMatch?.[4] || ""
-    const internalPath = getInternalPath(href)
+type ParsedNode = {
+  nodeName?: string
+  attrs?: Array<{ name: string; value: string }>
+  childNodes?: ParsedNode[]
+  sourceCodeLocation?: {
+    startTag?: {
+      startOffset: number
+      endOffset: number
+    }
+  }
+}
 
-    if (internalPath) {
-      return normalizeInternalAnchor(anchorTag, internalPath)
+function collectAnchorNodes(root: ParsedNode) {
+  const anchors: ParsedNode[] = []
+  const stack: ParsedNode[] = [root]
+
+  while (stack.length > 0) {
+    const node = stack.pop()
+    if (!node) continue
+
+    if (node.nodeName === "a" && node.sourceCodeLocation?.startTag) {
+      anchors.push(node)
     }
 
-    if (!isExternalLink(href)) return anchorTag
+    if (node.childNodes?.length) {
+      for (let i = node.childNodes.length - 1; i >= 0; i -= 1) {
+        stack.push(node.childNodes[i])
+      }
+    }
+  }
 
-    return normalizeExternalAnchor(anchorTag)
+  return anchors
+}
+
+function transformExternalLinks(html: string) {
+  const parsed = parseFragment(html, {
+    sourceCodeLocationInfo: true,
+  }) as ParsedNode
+  const replacements: Array<{
+    startOffset: number
+    endOffset: number
+    tag: string
+  }> = []
+
+  collectAnchorNodes(parsed).forEach((anchorNode) => {
+    const startTag = anchorNode.sourceCodeLocation?.startTag
+    if (!startTag) return
+
+    const originalAnchorTag = html.slice(startTag.startOffset, startTag.endOffset)
+    const hrefAttr = anchorNode.attrs?.find((attr) => attr.name === "href")
+    const href = hrefAttr?.value || ""
+    const internalPath = getInternalPath(href, "https://www.tamalchowdhury.com")
+
+    if (internalPath) {
+      const updatedTag = normalizeInternalAnchor(originalAnchorTag, internalPath)
+      if (updatedTag !== originalAnchorTag) {
+        replacements.push({
+          startOffset: startTag.startOffset,
+          endOffset: startTag.endOffset,
+          tag: updatedTag,
+        })
+      }
+      return
+    }
+
+    if (!isExternalLink(href)) return
+
+    const updatedTag = normalizeExternalAnchor(originalAnchorTag)
+    if (updatedTag !== originalAnchorTag) {
+      replacements.push({
+        startOffset: startTag.startOffset,
+        endOffset: startTag.endOffset,
+        tag: updatedTag,
+      })
+    }
   })
+
+  if (replacements.length === 0) return html
+
+  let updatedHtml = html
+  replacements
+    .sort((a, b) => b.startOffset - a.startOffset)
+    .forEach(({ startOffset, endOffset, tag }) => {
+      updatedHtml =
+        updatedHtml.slice(0, startOffset) + tag + updatedHtml.slice(endOffset)
+    })
+
+  return updatedHtml
 }
 
 function conditionalDateByline(publishedDate: string, updatedDate: string) {

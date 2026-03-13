@@ -3,36 +3,11 @@
 import { useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { BASE_URL } from "@/app/lib/consts"
+import { getInternalPath } from "../lib/internal-links"
 
 type Props = {
   html: string
   className?: string
-}
-
-const INTERNAL_HOSTS = new Set([
-  "tamalchowdhury.com",
-  "www.tamalchowdhury.com",
-  "wp.tamalchowdhury.com",
-])
-
-function getInternalPathFromHref(href: string) {
-  if (!href) return null
-  if (href.startsWith("/")) return href
-  if (href.startsWith("#")) return href
-  if (href.startsWith("mailto:") || href.startsWith("tel:")) return null
-
-  try {
-    const url = new URL(href, BASE_URL)
-    const isHttp = url.protocol === "http:" || url.protocol === "https:"
-    if (!isHttp) return null
-
-    const hostname = url.hostname.toLowerCase()
-    if (!INTERNAL_HOSTS.has(hostname)) return null
-
-    return `${url.pathname}${url.search}${url.hash}`
-  } catch {
-    return null
-  }
 }
 
 function getTableTsv(table: HTMLTableElement) {
@@ -141,7 +116,7 @@ export default function PostContent({ html, className = "" }: Props) {
 
     root.querySelectorAll<HTMLAnchorElement>("a[href]").forEach((anchor) => {
       const rawHref = anchor.getAttribute("href") || ""
-      const internalPath = getInternalPathFromHref(rawHref)
+      const internalPath = getInternalPath(rawHref, BASE_URL)
       if (!internalPath) return
 
       anchor.setAttribute("href", internalPath)

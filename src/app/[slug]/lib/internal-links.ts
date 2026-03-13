@@ -30,7 +30,7 @@ function isWordPressProtectedPath(pathname: string) {
 
 export function getInternalPath(href: string, baseUrl: string) {
   if (!href) return null
-  if (href.startsWith("/")) return href
+  if (href.startsWith("/") && !href.startsWith("//")) return href
   if (href.startsWith("#")) return href
   if (href.startsWith("mailto:") || href.startsWith("tel:")) return null
 

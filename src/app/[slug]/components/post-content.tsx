@@ -64,6 +64,9 @@ export default function PostContent({ html, className = "" }: Props) {
 
     const removeListeners: Array<() => void> = []
     const removeButtons: Array<() => void> = []
+    const prefetchedPaths = new Set<string>()
+    const lastPrefetchAt = new Map<string, number>()
+    const PREFETCH_THROTTLE_MS = 250
 
     root
       .querySelectorAll<HTMLButtonElement>(
@@ -121,8 +124,18 @@ export default function PostContent({ html, className = "" }: Props) {
 
       anchor.setAttribute("href", internalPath)
 
-      if (!anchor.getAttribute("target")) {
+      const onIntentPrefetch = () => {
+        const target = anchor.getAttribute("target")
+        if (target && target !== "_self") return
+        if (prefetchedPaths.has(internalPath)) return
+
+        const now = Date.now()
+        const lastRun = lastPrefetchAt.get(internalPath) ?? 0
+        if (now - lastRun < PREFETCH_THROTTLE_MS) return
+        lastPrefetchAt.set(internalPath, now)
+
         void router.prefetch(internalPath)
+        prefetchedPaths.add(internalPath)
       }
 
       const onClick = (event: MouseEvent) => {
@@ -146,7 +159,15 @@ export default function PostContent({ html, className = "" }: Props) {
       }
 
       anchor.addEventListener("click", onClick)
+      anchor.addEventListener("mouseenter", onIntentPrefetch)
+      anchor.addEventListener("focus", onIntentPrefetch)
       removeListeners.push(() => anchor.removeEventListener("click", onClick))
+      removeListeners.push(() =>
+        anchor.removeEventListener("mouseenter", onIntentPrefetch),
+      )
+      removeListeners.push(() =>
+        anchor.removeEventListener("focus", onIntentPrefetch),
+      )
     })
 
     return () => {

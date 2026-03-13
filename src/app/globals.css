@@ -2,8 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-html {
-  scroll-behavior: smooth;
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 .post__body p {
@@ -162,7 +164,9 @@ html {
   border-right: 1px solid #d1d5db;
 }
 
-.post__body .wp-block-table tr:first-child td {
+.post__body .wp-block-table tr:first-child td,
+.post__body .wp-block-table thead th,
+.post__body .wp-block-table th {
   @apply bg-gray-200 font-semibold uppercase text-[0.82em];
   letter-spacing: 0.03em;
 }
